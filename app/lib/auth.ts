@@ -4,7 +4,7 @@ export const SESSION_COOKIE = "care_mdd_session";
 export const SESSION_VALUE = "care-mdd-admin-authenticated";
 
 export function isValidLogin(username: string, password: string) {
-  return username === "polyu" && password === "polyu";
+  return username === "polyu" && password === "caremdd";
 }
 
 export async function hasValidSession() {
