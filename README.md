@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3005](http://localhost:3005).
+Open [http://localhost:3006](http://localhost:3006).
 
 Development login:
 
