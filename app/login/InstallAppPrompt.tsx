@@ -13,7 +13,6 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<InstallChoice>;
 }
 
-const DISMISSED_KEY = "care-mdd-install-prompt-dismissed-v1";
 const INSTALLED_KEY = "care-mdd-pwa-installed";
 
 export default function InstallAppPrompt() {
@@ -35,17 +34,19 @@ export default function InstallAppPrompt() {
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       mobileNavigator.standalone === true;
-    const wasDismissed = localStorage.getItem(DISMISSED_KEY) === "true";
     const wasInstalled = localStorage.getItem(INSTALLED_KEY) === "true";
 
     setIsIos(iosDevice);
 
-    if (!isMobile || isStandalone || wasDismissed || wasInstalled) return;
+    if (!isMobile || isStandalone) return;
 
-    const showTimer = window.setTimeout(() => setVisible(true), 500);
+    const showTimer = window.setTimeout(() => {
+      if (!wasInstalled) setVisible(true);
+    }, 500);
 
     function handleBeforeInstallPrompt(event: Event) {
       event.preventDefault();
+      localStorage.removeItem(INSTALLED_KEY);
       setInstallPrompt(event as BeforeInstallPromptEvent);
       setVisible(true);
     }
@@ -67,7 +68,6 @@ export default function InstallAppPrompt() {
   }, []);
 
   function closePrompt() {
-    localStorage.setItem(DISMISSED_KEY, "true");
     setVisible(false);
   }
 
@@ -84,7 +84,6 @@ export default function InstallAppPrompt() {
       const choice = await installPrompt.userChoice;
 
       if (choice.outcome === "accepted") {
-        localStorage.setItem(INSTALLED_KEY, "true");
         setVisible(false);
       }
 
