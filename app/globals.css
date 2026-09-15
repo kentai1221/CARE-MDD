@@ -576,6 +576,20 @@ button {
   background: var(--accent);
 }
 
+.message-image-bubble {
+  padding: 6px;
+  background: var(--accent);
+}
+
+.chat-message-image {
+  width: auto;
+  max-width: min(100%, 420px);
+  max-height: 420px;
+  display: block;
+  object-fit: contain;
+  border-radius: 14px;
+}
+
 .typing-indicator {
   color: var(--text-muted);
   font-size: 13px;
@@ -590,11 +604,16 @@ button {
 .chat-composer {
   padding: 14px max(18px, calc((100vw - 884px) / 2)) max(14px, env(safe-area-inset-bottom));
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 48px;
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) 44px 48px;
+  gap: 8px;
   align-items: center;
   border-top: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.92);
+}
+
+.composer-input-area {
+  min-width: 0;
+  position: relative;
 }
 
 .chat-composer input {
@@ -620,24 +639,24 @@ button {
   box-shadow: 0 0 0 3px rgba(32, 183, 159, 0.11);
 }
 
-.chat-composer > button {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  color: #ffffff;
-  border: 0;
-  border-radius: 50%;
-  background: var(--accent);
-  cursor: pointer;
-  transition: transform 150ms ease, opacity 150ms ease;
+.image-upload-input {
+  display: none;
 }
 
-.chat-composer > button:hover:not(:disabled) {
+.composer-icon-button {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  touch-action: none;
+  transition: color 150ms ease, border-color 150ms ease, background 150ms ease, transform 150ms ease, opacity 150ms ease;
+}
+
+.composer-icon-button:hover:not(:disabled) {
   transform: scale(1.04);
 }
 
-.chat-composer > button:disabled {
+.composer-icon-button:disabled {
   cursor: not-allowed;
   opacity: 0.35;
 }
@@ -645,7 +664,77 @@ button {
 .chat-composer svg {
   width: 22px;
   height: 22px;
+}
+
+.image-upload-button {
+  width: 44px;
+  height: 44px;
+  color: var(--accent-strong);
+  border: 1px solid #b9dfd8;
+  background: #edf9f6;
+}
+
+.image-upload-button svg,
+.voice-input-button svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.composer-primary-button {
+  width: 48px;
+  height: 48px;
+  color: #ffffff;
+  border: 0;
+  background: var(--accent);
+}
+
+.send-button svg {
   fill: currentColor;
+}
+
+.voice-input-button.is-recording {
+  background: #cf3f4d;
+  box-shadow: 0 0 0 7px rgba(207, 63, 77, 0.14);
+  transform: scale(0.96);
+}
+
+.recording-status {
+  position: absolute;
+  inset: 0;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #a52d39;
+  border: 1px solid #e7aeb4;
+  border-radius: 999px;
+  background: #fff5f6;
+  pointer-events: none;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.recording-status time {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.recording-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #cf3f4d;
+  animation: recording-pulse 1s ease-in-out infinite;
+}
+
+@keyframes recording-pulse {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.82);
+  }
 }
 
 .emergency-overlay {

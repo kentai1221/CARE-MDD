@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  type KeyboardEvent,
+  type PointerEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import type { ChatMessage, Conversation } from "./lib/conversation-types";
 
@@ -19,6 +26,38 @@ const HARDCODED_USER_MESSAGE =
   "我最近真係好大壓力，成日形住自己會做錯嘢，停唔到咁諗...";
 const HARDCODED_ASSISTANT_REPLY =
   "聽得出你最近真係好辛苦。我哋試吓退後一步睇？如果呢個『驚做錯嘢』嘅想法有一把聲，你覺得佢會點同你講嘢？";
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const SUPPORTED_IMAGE_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
+  "image/heic",
+  "image/heif",
+];
+
+function readImageAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+      } else {
+        reject(new Error("未能讀取圖片"));
+      }
+    };
+    reader.onerror = () => reject(new Error("未能讀取圖片"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function formatRecordingTime(seconds: number) {
+  const minutes = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, "0");
+  const remainingSeconds = (seconds % 60).toString().padStart(2, "0");
+  return `${minutes}:${remainingSeconds}`;
+}
 
 export default function ChatClient({ initialConversation }: Props) {
   const router = useRouter();
@@ -29,6 +68,9 @@ export default function ChatClient({ initialConversation }: Props) {
   );
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [savingTitle, setSavingTitle] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [emergencyOpen, setEmergencyOpen] = useState(false);
@@ -39,6 +81,8 @@ export default function ChatClient({ initialConversation }: Props) {
   const [charId] = useState(initialConversation.charId ?? "");
 
   const listRef = useRef<HTMLDivElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const recordingStartedAtRef = useRef(0);
 
   useEffect(() => {
     listRef.current?.scrollTo({
@@ -46,6 +90,18 @@ export default function ChatClient({ initialConversation }: Props) {
       behavior: "smooth",
     });
   }, [messages, loading]);
+
+  useEffect(() => {
+    if (!isRecording) return;
+
+    const timer = window.setInterval(() => {
+      setRecordingSeconds(
+        Math.floor((Date.now() - recordingStartedAtRef.current) / 1000)
+      );
+    }, 250);
+
+    return () => window.clearInterval(timer);
+  }, [isRecording]);
 
   async function updateConversation(
     updates: Partial<
@@ -199,6 +255,93 @@ export default function ChatClient({ initialConversation }: Props) {
     }
   }
 
+  async function uploadImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file || loading || uploadingImage) return;
+
+    if (!SUPPORTED_IMAGE_TYPES.includes(file.type)) {
+      setError("只支援 PNG、JPEG、WebP、GIF、HEIC 或 HEIF 圖片");
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      setError("圖片大小不能超過 5 MB");
+      return;
+    }
+
+    setUploadingImage(true);
+    setError(null);
+
+    try {
+      const imageDataUrl = await readImageAsDataUrl(file);
+      const imageMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "user",
+        content: "圖片",
+        imageDataUrl,
+        createdAt: new Date().toISOString(),
+      };
+      const nextMessages = [...messages, imageMessage];
+
+      setMessages(nextMessages);
+      await updateConversation({
+        messages: nextMessages,
+        sessionId,
+        charId: charId || null,
+      });
+    } catch (caughtError) {
+      setMessages(messages);
+      setError(
+        caughtError instanceof Error ? caughtError.message : "未能上傳圖片"
+      );
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
+  function beginPrototypeRecording() {
+    if (loading || uploadingImage || emergencyOpen || input.trim()) return;
+
+    recordingStartedAtRef.current = Date.now();
+    setRecordingSeconds(0);
+    setIsRecording(true);
+  }
+
+  function endPrototypeRecording() {
+    setIsRecording(false);
+    setRecordingSeconds(0);
+  }
+
+  function handleVoicePointerDown(event: PointerEvent<HTMLButtonElement>) {
+    if (input.trim()) return;
+
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    beginPrototypeRecording();
+  }
+
+  function handleVoiceKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    if (
+      input.trim() ||
+      event.repeat ||
+      (event.key !== " " && event.key !== "Enter")
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    beginPrototypeRecording();
+  }
+
+  function handleVoiceKeyUp(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.key !== " " && event.key !== "Enter") return;
+
+    event.preventDefault();
+    endPrototypeRecording();
+  }
+
   async function deleteCurrentConversation() {
     const response = await fetch(
       `/api/conversations/${initialConversation.id}`,
@@ -323,8 +466,20 @@ export default function ChatClient({ initialConversation }: Props) {
             className={`message-row ${message.role === "user" ? "message-row-user" : ""}`}
             key={message.id}
           >
-            <div className={`message-bubble message-${message.role}`}>
-              <span>{message.content}</span>
+            <div
+              className={`message-bubble message-${message.role} ${message.imageDataUrl ? "message-image-bubble" : ""}`}
+            >
+              {message.imageDataUrl ? (
+                // User-selected data URLs are displayed directly and are not sent to Convai.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  className="chat-message-image"
+                  src={message.imageDataUrl}
+                  alt="用戶上傳的圖片"
+                />
+              ) : (
+                <span>{message.content}</span>
+              )}
             </div>
           </div>
         ))}
@@ -343,27 +498,82 @@ export default function ChatClient({ initialConversation }: Props) {
         <label className="sr-only" htmlFor="chat-message">
           訊息
         </label>
+        <div className="composer-input-area">
+          <input
+            id="chat-message"
+            placeholder="輸入訊息…"
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+              }
+            }}
+            disabled={loading || uploadingImage || emergencyOpen || isRecording}
+          />
+
+          {isRecording ? (
+            <div className="recording-status" role="status" aria-live="polite">
+              <span className="recording-dot" aria-hidden="true" />
+              <span>錄音中</span>
+              <time>{formatRecordingTime(recordingSeconds)}</time>
+            </div>
+          ) : null}
+        </div>
+
         <input
-          id="chat-message"
-          placeholder="輸入訊息…"
-          value={input}
-          onChange={(event) => setInput(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" && !event.shiftKey) {
-              event.preventDefault();
-              sendMessage();
-            }
-          }}
-          disabled={loading || emergencyOpen}
+          ref={imageInputRef}
+          className="image-upload-input"
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif,image/heic,image/heif"
+          onChange={uploadImage}
+          tabIndex={-1}
+          aria-hidden="true"
         />
+
         <button
-          type="submit"
-          disabled={loading || emergencyOpen || !input.trim()}
-          aria-label="傳送訊息"
+          className="composer-icon-button image-upload-button"
+          type="button"
+          onClick={() => imageInputRef.current?.click()}
+          disabled={loading || uploadingImage || emergencyOpen || isRecording}
+          aria-label={uploadingImage ? "正在上傳圖片" : "上傳圖片"}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="m3 3 18 9-18 9 3-8 9-1-9-1-3-8Z" />
+            <rect x="3" y="4" width="18" height="16" rx="3" />
+            <circle cx="9" cy="9" r="1.5" />
+            <path d="m5 17 4.5-4.5 3 3 2-2L19 18" />
           </svg>
+        </button>
+
+        <button
+          className={`composer-icon-button composer-primary-button ${input.trim() ? "send-button" : "voice-input-button"} ${isRecording ? "is-recording" : ""}`}
+          type={input.trim() ? "submit" : "button"}
+          disabled={loading || uploadingImage || emergencyOpen}
+          onPointerDown={handleVoicePointerDown}
+          onPointerUp={endPrototypeRecording}
+          onPointerCancel={endPrototypeRecording}
+          onKeyDown={handleVoiceKeyDown}
+          onKeyUp={handleVoiceKeyUp}
+          onContextMenu={(event) => event.preventDefault()}
+          aria-label={
+            input.trim()
+              ? "傳送訊息"
+              : isRecording
+                ? "鬆開停止錄音"
+                : "按住錄音"
+          }
+        >
+          {input.trim() ? (
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m3 3 18 9-18 9 3-8 9-1-9-1-3-8Z" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="9" y="3" width="6" height="11" rx="3" />
+              <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M9 21h6" />
+            </svg>
+          )}
         </button>
       </form>
 

@@ -14,12 +14,20 @@ type RouteContext = {
 function isChatMessage(value: unknown): value is ChatMessage {
   if (!value || typeof value !== "object") return false;
   const message = value as Record<string, unknown>;
+  const hasValidImage =
+    message.imageDataUrl === undefined ||
+    (typeof message.imageDataUrl === "string" &&
+      message.imageDataUrl.length <= 7_000_000 &&
+      /^data:image\/(png|jpeg|webp|gif|heic|heif);base64,[a-zA-Z0-9+/=]+$/.test(
+        message.imageDataUrl
+      ));
 
   return (
     typeof message.id === "string" &&
     (message.role === "user" || message.role === "assistant") &&
     typeof message.content === "string" &&
-    typeof message.createdAt === "string"
+    typeof message.createdAt === "string" &&
+    hasValidImage
   );
 }
 

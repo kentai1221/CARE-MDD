@@ -58,7 +58,9 @@ export async function listConversations(): Promise<ConversationSummary[]> {
       createdAt: conversation.createdAt,
       updatedAt: conversation.updatedAt,
       preview:
-        conversation.messages.at(-1)?.content.trim() || "尚未開始對話",
+        conversation.messages.at(-1)?.imageDataUrl
+          ? "圖片"
+          : conversation.messages.at(-1)?.content.trim() || "尚未開始對話",
     }))
     .sort(
       (first, second) =>
