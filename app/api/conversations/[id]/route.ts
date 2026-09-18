@@ -32,7 +32,7 @@ function isChatMessage(value: unknown): value is ChatMessage {
 }
 
 export async function GET(_request: Request, context: RouteContext) {
-  if (!(await hasValidSession())) {
+  if (!(await hasValidSession("treatment"))) {
     return NextResponse.json({ error: "未登入" }, { status: 401 });
   }
 
@@ -47,7 +47,7 @@ export async function GET(_request: Request, context: RouteContext) {
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
-  if (!(await hasValidSession())) {
+  if (!(await hasValidSession("treatment"))) {
     return NextResponse.json({ error: "未登入" }, { status: 401 });
   }
 
@@ -107,7 +107,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 }
 
 export async function DELETE(_request: Request, context: RouteContext) {
-  if (!(await hasValidSession())) {
+  if (!(await hasValidSession("treatment"))) {
     return NextResponse.json({ error: "未登入" }, { status: 401 });
   }
 

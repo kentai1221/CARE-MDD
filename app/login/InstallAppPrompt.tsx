@@ -117,7 +117,7 @@ export default function InstallAppPrompt() {
           alt=""
         />
         <div>
-          <h2 id="install-app-title">安裝 CARE-MDD</h2>
+          <h2 id="install-app-title">安裝另存心檔</h2>
           <p>加到手機主畫面，以 App 模式開啟。</p>
         </div>
       </div>

@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CARE-MDD",
+  title: "另存心檔",
   description: "CBT 心理教育與自助練習聊天支援",
-  applicationName: "CARE-MDD",
+  applicationName: "另存心檔",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "CARE-MDD",
+    title: "另存心檔",
     statusBarStyle: "default",
   },
   other: {

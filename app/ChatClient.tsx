@@ -455,7 +455,7 @@ export default function ChatClient({ initialConversation }: Props) {
       <aside className="chat-notice">
         <span aria-hidden="true">i</span>
         <p>
-          CARE-MDD 提供認知行為治療相關的心理教育與自助練習，只供一般參考，
+          另存心檔提供認知行為治療相關的心理教育與自助練習，只供一般參考，
           不能取代專業診斷或治療。如困擾持續、加劇或出現危機，請尋求合資格的心理健康專業人士或緊急支援服務。
         </p>
       </aside>
@@ -484,7 +484,7 @@ export default function ChatClient({ initialConversation }: Props) {
           </div>
         ))}
 
-        {loading ? <div className="typing-indicator">CARE-MDD 正在輸入…</div> : null}
+        {loading ? <div className="typing-indicator">另存心檔正在輸入…</div> : null}
         {error ? <div className="chat-error">信息：{error}</div> : null}
       </div>
 

@@ -9,7 +9,7 @@ import type {
 const DATA_DIRECTORY = path.join(process.cwd(), "data");
 const DATA_FILE = path.join(DATA_DIRECTORY, "conversations.json");
 const DEFAULT_GREETING =
-  "你好，我是 CARE-MDD。今天有甚麼想法、情緒或情境想一起整理？";
+  "你好，我是另存心檔。今天有甚麼想法、情緒或情境想一起整理？";
 
 let mutationQueue: Promise<void> = Promise.resolve();
 

@@ -24,6 +24,7 @@
 .DS_Store
 *.pem
 /data/conversations.json
+/data/study.json
 
 # debug
 npm-debug.log*

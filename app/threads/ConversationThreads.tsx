@@ -70,9 +70,7 @@ export default function ConversationThreads({
   async function logout() {
     if (!window.confirm("確定要登出嗎？")) return;
 
-    await fetch("/api/logout", { method: "POST" });
-    router.replace("/login");
-    router.refresh();
+    router.push("/mood?phase=post");
   }
 
   return (
@@ -89,7 +87,7 @@ export default function ConversationThreads({
               <path d="m15 5-7 7 7 7" />
             </svg>
           </button>
-          <h1 className="threads-brand">CARE-MDD</h1>
+          <h1 className="threads-brand">另存心檔</h1>
           <button
             className="new-conversation-button"
             type="button"

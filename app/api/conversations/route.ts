@@ -6,7 +6,7 @@ import {
 } from "@/app/lib/conversations";
 
 export async function GET() {
-  if (!(await hasValidSession())) {
+  if (!(await hasValidSession("treatment"))) {
     return NextResponse.json({ error: "未登入" }, { status: 401 });
   }
 
@@ -14,7 +14,7 @@ export async function GET() {
 }
 
 export async function POST() {
-  if (!(await hasValidSession())) {
+  if (!(await hasValidSession("treatment"))) {
     return NextResponse.json({ error: "未登入" }, { status: 401 });
   }
 

@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "CARE-MDD",
-    short_name: "CARE-MDD",
+    name: "另存心檔",
+    short_name: "另存心檔",
     description: "CBT 心理教育與自助練習聊天支援",
     start_url: "/",
     scope: "/",

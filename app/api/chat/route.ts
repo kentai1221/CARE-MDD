@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { hasValidSession } from "@/app/lib/auth";
 
 const CONVAI_URL = "https://api.convai.com/character/getResponse";
 
 export async function POST(req: NextRequest) {
+  if (!(await hasValidSession("treatment"))) {
+    return NextResponse.json({ error: "未獲授權使用對話功能" }, { status: 403 });
+  }
+
   try {
     const { message, sessionId, charId } = await req.json();
 
@@ -243,7 +248,7 @@ export async function POST(req: NextRequest) {
     // CBT 角色指示（強化記憶）
     prompt += "【角色指示】\n";
     prompt +=
-      "你是 CARE-MDD，一個提供認知行為治療（CBT）相關心理教育與自助練習支援的聊天助手。請在後續對話中持續參考以上資料，以親切、不批判和合作的方式回應，透過合適的開放式問題，協助使用者辨識情境、想法、情緒、身體感受與行為之間的關係，並探索較平衡的想法及可實行的小步驟。不要聲稱自己是持牌心理治療師，不作診斷，也不要把回應當成專業治療。如資料不足或不確定，應坦白說明；如使用者持續受困擾，建議尋求合資格的心理健康專業人士。若使用者表示可能傷害自己或他人，應鼓勵立即聯絡當地緊急服務、危機支援或可信任的人。\n\n";
+      "你是另存心檔，一個提供認知行為治療（CBT）相關心理教育與自助練習支援的聊天助手。請在後續對話中持續參考以上資料，以親切、不批判和合作的方式回應，透過合適的開放式問題，協助使用者辨識情境、想法、情緒、身體感受與行為之間的關係，並探索較平衡的想法及可實行的小步驟。不要聲稱自己是持牌心理治療師，不作診斷，也不要把回應當成專業治療。如資料不足或不確定，應坦白說明；如使用者持續受困擾，建議尋求合資格的心理健康專業人士。若使用者表示可能傷害自己或他人，應鼓勵立即聯絡當地緊急服務、危機支援或可信任的人。\n\n";
 
     // 回覆語言
     prompt += "【回覆語言】\n";

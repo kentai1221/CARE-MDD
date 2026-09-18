@@ -1,10 +1,12 @@
 import { redirect } from "next/navigation";
-import { hasValidSession } from "./lib/auth";
+import { getStudyHomePath, getStudySession } from "./lib/auth";
 
 export default async function HomePage() {
-  if (!(await hasValidSession())) {
+  const session = await getStudySession();
+
+  if (!session) {
     redirect("/login");
   }
 
-  redirect("/threads");
+  redirect(getStudyHomePath(session.arm));
 }

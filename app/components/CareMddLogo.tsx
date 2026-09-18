@@ -8,7 +8,7 @@ export default function CareMddLogo({ className }: CareMddLogoProps) {
       className={className}
       viewBox="0 0 160 160"
       role="img"
-      aria-label="CARE-MDD logo"
+      aria-label="另存心檔標誌"
     >
       <defs>
         <linearGradient id="care-mdd-gradient" x1="24" y1="20" x2="140" y2="146">

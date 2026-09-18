@@ -1,6 +1,6 @@
-# CARE-MDD
+# 另存心檔
 
-CARE-MDD is a mobile-friendly CBT support chatbot built with Next.js. It includes a hardcoded single-user login, persistent conversation threads, crisis keyword handling, and installable PWA support.
+另存心檔 is a mobile-friendly mental-health study app built with Next.js. It provides separate treatment and active digital control pathways, mood ratings, persistent conversation threads, crisis keyword handling, and installable PWA support.
 
 ## Local development
 
@@ -41,4 +41,4 @@ npm start
 
 ## PWA installation
 
-Deploy the application over HTTPS. On a supported mobile browser, CARE-MDD can be installed from the login-page prompt or added to the device home screen and opened in standalone mode.
+Deploy the application over HTTPS. On a supported mobile browser, 另存心檔 can be installed from the login-page prompt or added to the device home screen and opened in standalone mode.

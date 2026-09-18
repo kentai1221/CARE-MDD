@@ -29,7 +29,7 @@ export default function LoginForm() {
         throw new Error(data?.error || "登入失敗，請再試一次");
       }
 
-      router.replace("/threads");
+      router.replace(data.nextPath || "/mood?phase=pre");
       router.refresh();
     } catch (caughtError) {
       setError(
@@ -45,7 +45,7 @@ export default function LoginForm() {
       <section className="login-card" aria-labelledby="login-title">
         <div className="login-brand">
           <CareMddLogo className="login-logo" />
-          <h1 id="login-title">CARE-MDD</h1>
+          <h1 id="login-title">另存心檔</h1>
         </div>
 
         <form className="login-form" onSubmit={handleSubmit}>
